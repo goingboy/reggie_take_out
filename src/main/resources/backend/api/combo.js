@@ -8,11 +8,11 @@ const getSetmealPage = (params) => {
 }
 
 // 删除数据接口
-const deleteSetmeal = (ids) => {
+const deleteSetmeal = (id) => {
   return $axios({
     url: '/setmeal',
     method: 'delete',
-    params: { ids }
+    params: { id }
   })
 }
 
