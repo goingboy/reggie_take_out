@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @Slf4j
 @RequestMapping("/category")
@@ -17,6 +19,26 @@ public class CategoryController{
 
     @Autowired
     CategoryService categoryService;
+
+    /**
+     * 根据条件查询分类数据
+     * @param category
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Category>> list(Category category){
+
+        //条件构造器
+        LambdaQueryWrapper<Category> lambdaQueryWrapper = new LambdaQueryWrapper();
+        //添加条件
+        lambdaQueryWrapper.eq(category.getType() != null, Category::getType, category.getType());
+        //添加排序
+        lambdaQueryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+
+        List<Category> list = categoryService.list(lambdaQueryWrapper);
+
+        return R.success(list);
+    }
 
     /**
      * 新增分类
@@ -42,6 +64,8 @@ public class CategoryController{
 
         //条件构造器
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        //只显示未删除的分类
+        queryWrapper.eq(Category::getIsDeleted, 0);
         //添加排序条件，根据sort进行排序
         queryWrapper.orderByAsc(Category::getSort);
 
@@ -53,15 +77,15 @@ public class CategoryController{
 
     /**
      * 根据id删除分类
-     * @param id
+     * @param ids
      * @return
      */
     @DeleteMapping
-    public R<String> delete(Long id){
-        log.info("删除分类，id为{}", id);
+    public R<String> delete(Long ids){
+        log.info("删除分类，id为{}", ids);
 
         //categoryService.removeById(id);
-        categoryService.remove(id);
+        categoryService.remove(ids);
 
         return R.success("分类信息删除成功");
     }
