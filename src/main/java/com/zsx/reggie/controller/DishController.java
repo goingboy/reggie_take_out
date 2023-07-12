@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zsx.reggie.common.R;
 import com.zsx.reggie.dto.DishDto;
+import com.zsx.reggie.dto.SetmealDto;
 import com.zsx.reggie.entity.Category;
 import com.zsx.reggie.entity.Dish;
 import com.zsx.reggie.service.CategoryService;
@@ -128,7 +129,7 @@ public class DishController {
      * @return
      */
     @PostMapping("/status/{status}")
-    public R<String> updateStatus(@PathVariable Integer status,  Long[] ids){
+    public R<String> updateStatus(@PathVariable Integer status, @RequestParam Long[] ids){
 
         LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.in(ids != null && ids.length > 0, Dish::getId, ids);
@@ -159,4 +160,26 @@ public class DishController {
 
         return R.success("删除菜品成功");
     }
+
+    /**
+     * 根据条件查询对应的菜品数据
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish){
+
+        //构造查询条件
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //增加排序条件
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        //只查询状态为1（起售）的菜品
+        queryWrapper.eq(Dish::getStatus, 1);
+
+        List<Dish> dishList = dishService.list(queryWrapper);
+
+        return R.success(dishList);
+    }
+
 }
