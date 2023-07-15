@@ -6,7 +6,6 @@ import com.zsx.reggie.common.R;
 import com.zsx.reggie.entity.Category;
 import com.zsx.reggie.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,6 +89,11 @@ public class CategoryController{
         return R.success("分类信息删除成功");
     }
 
+    /**
+     * 更新分类信息
+     * @param category
+     * @return
+     */
     @PutMapping
     public R<String> update(@RequestBody Category category){
 

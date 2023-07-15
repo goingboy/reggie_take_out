@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zsx.reggie.common.R;
 import com.zsx.reggie.dto.DishDto;
-import com.zsx.reggie.dto.SetmealDto;
 import com.zsx.reggie.entity.Category;
 import com.zsx.reggie.entity.Dish;
 import com.zsx.reggie.service.CategoryService;
@@ -16,12 +15,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.alibaba.fastjson.JSONValidator.Type.Array;
 
 /**
  * 菜品管理
@@ -166,20 +162,33 @@ public class DishController {
      * @param dish
      * @return
      */
+//    @GetMapping("/list")
+//    public R<List<Dish>> list(Dish dish){
+//
+//        //构造查询条件
+//        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+//        //增加排序条件
+//        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+//        //只查询状态为1（起售）的菜品
+//        queryWrapper.eq(Dish::getStatus, 1);
+//
+//        List<Dish> dishList = dishService.list(queryWrapper);
+//
+//        return R.success(dishList);
+//    }
+
+    /**
+     * 根据条件查询对应的菜品数据
+     * @param dish
+     * @return
+     */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish){
+    public R<List<DishDto>> list(Dish dish){
 
-        //构造查询条件
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
-        //增加排序条件
-        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
-        //只查询状态为1（起售）的菜品
-        queryWrapper.eq(Dish::getStatus, 1);
+        List<DishDto> dishDtoList = dishService.listWithFlavor(dish);
 
-        List<Dish> dishList = dishService.list(queryWrapper);
-
-        return R.success(dishList);
+        return R.success(dishDtoList);
     }
 
 }

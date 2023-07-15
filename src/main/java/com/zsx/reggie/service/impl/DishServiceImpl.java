@@ -6,7 +6,6 @@ import com.zsx.reggie.dto.DishDto;
 import com.zsx.reggie.entity.Category;
 import com.zsx.reggie.entity.Dish;
 import com.zsx.reggie.entity.DishFlavor;
-import com.zsx.reggie.mapper.CategoryMapper;
 import com.zsx.reggie.mapper.DishMapper;
 import com.zsx.reggie.service.CategoryService;
 import com.zsx.reggie.service.DishFlavorService;
@@ -26,6 +25,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Autowired
     DishFlavorService dishFlavorService;
+
+    @Autowired
+    CategoryService categoryService;
 
     /**
      * 保存菜品，同时保存菜品口味
@@ -99,5 +101,47 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         dishFlavorService.saveBatch(flavors);
 
+    }
+
+    /**
+     * 查询菜品列表，同时也查询出这些菜品的口味信息
+     * @param dish
+     * @return
+     */
+    public List<DishDto> listWithFlavor(Dish dish) {
+
+        //构造查询条件
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //增加排序条件
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        //只查询状态为1（起售）的菜品
+        queryWrapper.eq(Dish::getStatus, 1);
+
+        List<Dish> dishList = this.list(queryWrapper);
+
+        //查询菜品的分类和口味信息
+        List<DishDto> dishDtoList = dishList.stream().map((item) -> {
+            DishDto dishDto = new DishDto();
+            //拷贝属性
+            BeanUtils.copyProperties(item, dishDto);
+
+            //设置分类名称
+            Long categoryId = item.getCategoryId();
+            Category category = categoryService.getById(categoryId);
+            dishDto.setCategoryName(category.getName());
+
+            //设置口味
+            Long dishId = item.getId();
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(DishFlavor::getDishId, dishId);
+            List<DishFlavor> dishFlavorList = dishFlavorService.list(lambdaQueryWrapper);
+
+            dishDto.setFlavors(dishFlavorList);
+
+            return dishDto;
+        }).collect(Collectors.toList());
+
+        return dishDtoList;
     }
 }

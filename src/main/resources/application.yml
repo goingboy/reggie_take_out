@@ -20,3 +20,9 @@ mybatis-plus:
 
 reggie:
   basePath: E:\img\
+
+aliyun:
+  sms:
+    accessId: aaaaaaaa
+    accessKey: bbbbbbbb
+    signName: 瑞吉外卖
