@@ -1,6 +1,7 @@
 package com.zsx.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zsx.reggie.common.BaseContext;
 import com.zsx.reggie.common.R;
 import com.zsx.reggie.entity.User;
 import com.zsx.reggie.service.UserService;
@@ -49,6 +50,13 @@ public class UserController {
         return R.error("发送失败");
     }
 
+    /**
+     * 用户登录
+     * @param map
+     * @param session
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/login")
     public R<User> login(@RequestBody Map map, HttpSession session) throws Exception {
         log.info("请求参数：{}", map);
@@ -78,6 +86,22 @@ public class UserController {
         }
 
         return R.error("登录失败");
+    }
+
+    /**
+     * 用户退出登录
+     * @param
+     * @param session
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/loginout")
+    public R<User> loginout(HttpSession session) throws Exception {
+        log.info("退出登录：{}", BaseContext.getCurrentId());
+
+        session.removeAttribute("user");
+
+        return R.error("退出登录成功");
     }
 
 }
