@@ -21,7 +21,7 @@ import java.util.List;
 public class AddressBookController {
 
     @Autowired
-    AddressBookService addressBookService;
+    private AddressBookService addressBookService;
 
     /**
      * 新增地址
