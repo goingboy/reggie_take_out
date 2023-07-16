@@ -89,7 +89,6 @@ public class SetmealController {
             Long categoryId = item.getCategoryId();
             Category category = categoryService.getById(categoryId);
             if (category != null) {
-
                 String categoryName = category.getName();
                 dto.setCategoryName(categoryName);
             }

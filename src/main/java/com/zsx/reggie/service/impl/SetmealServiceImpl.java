@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -164,7 +165,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         List<Setmeal> setmealList = null;
 
         String setmealListStr = (String) redisTemplate.opsForValue().get(key);
-        if(StringUtils.isNotEmpty(setmealListStr)){
+        if (StringUtils.isNotEmpty(setmealListStr)) {
             setmealList = JSONObject.parseObject(setmealListStr, List.class);
             return setmealList;
         }
@@ -183,7 +184,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         setmealList = this.list(queryWrapper);
 
         //加入缓存中
-        redisTemplate.opsForValue().set(key, setmealList);
+        redisTemplate.opsForValue().set(key, JSONObject.toJSONString(setmealList), 1, TimeUnit.HOURS);
 
         return setmealList;
     }

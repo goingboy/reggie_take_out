@@ -8,8 +8,8 @@ import com.zsx.reggie.entity.Setmeal;
  */
 public class RedisKeyUtil {
 
-    public final static String DISH_EKY_PREFIX = "dish_";
-    public final static String SETMEAL_EKY_PREFIX = "dish_";
+    public final static String DISH_KEY_PREFIX = "dish_";
+    public final static String SETMEAL_KEY_PREFIX = "setmeal_";
 
 
     /**
@@ -18,10 +18,10 @@ public class RedisKeyUtil {
      * @return
      */
     public static String getCategoryDishKey(Dish dish){
-        return DISH_EKY_PREFIX + dish.getCategoryId() + "_" + dish.getStatus();
+        return DISH_KEY_PREFIX + dish.getCategoryId() + "_" + dish.getStatus();
     }
 
     public static String getCategorySetmealKey(Setmeal setmeal) {
-        return SETMEAL_EKY_PREFIX + setmeal.getCategoryId() + "_" + setmeal.getStatus();
+        return SETMEAL_KEY_PREFIX + setmeal.getCategoryId() + "_" + setmeal.getStatus();
     }
 }

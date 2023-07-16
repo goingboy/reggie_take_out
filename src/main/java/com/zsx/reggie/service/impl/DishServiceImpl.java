@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -173,7 +174,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             return dishDto;
         }).collect(Collectors.toList());
 
-       redisTemplate.opsForValue().set(key,  JSONObject.toJSONString(dishDtoList));
+       redisTemplate.opsForValue().set(key,  JSONObject.toJSONString(dishDtoList), 1, TimeUnit.HOURS);
 
         return dishDtoList;
     }
