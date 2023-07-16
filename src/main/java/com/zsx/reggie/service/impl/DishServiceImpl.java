@@ -1,5 +1,6 @@
 package com.zsx.reggie.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsx.reggie.dto.DishDto;
@@ -10,9 +11,12 @@ import com.zsx.reggie.mapper.DishMapper;
 import com.zsx.reggie.service.CategoryService;
 import com.zsx.reggie.service.DishFlavorService;
 import com.zsx.reggie.service.DishService;
+import com.zsx.reggie.utils.RedisKeyUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +28,13 @@ import java.util.stream.Collectors;
 public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements DishService {
 
     @Autowired
-    DishFlavorService dishFlavorService;
+    private DishFlavorService dishFlavorService;
 
     @Autowired
-    CategoryService categoryService;
+    private CategoryService categoryService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 保存菜品，同时保存菜品口味
@@ -52,6 +59,15 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         //保存口味信息 到表dish_flavor
         dishFlavorService.saveBatch(flavors);
+
+        //让redis里的菜品数据失效
+        //清理所有的菜品缓存数据
+//        Set keys = redisTemplate.keys(RedisKeyUtil.DISH_EKY_PREFIX + "*");
+//        redisTemplate.delete(keys);
+
+        //只清理这个菜品分类下的缓存数据
+        String key = RedisKeyUtil.getCategoryDishKey(dishDto);
+        redisTemplate.delete(key);
     }
 
     /**
@@ -101,6 +117,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
         dishFlavorService.saveBatch(flavors);
 
+        //只清理这个菜品分类下的缓存数据
+        String key = RedisKeyUtil.getCategoryDishKey(dishDto);
+        redisTemplate.delete(key);
     }
 
     /**
@@ -109,6 +128,18 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @return
      */
     public List<DishDto> listWithFlavor(Dish dish) {
+        //redis key: 按菜品分类，缓存菜品信息
+        String key = RedisKeyUtil.getCategoryDishKey(dish);
+
+        String dishDtoListStr = (String) redisTemplate.opsForValue().get(key);
+        List<DishDto> dishDtoList = null;
+        //如果缓存中有数据，则直接返回
+        if(StringUtils.isNotEmpty(dishDtoListStr)){
+            dishDtoList = JSONObject.parseObject(dishDtoListStr, List.class);
+            return dishDtoList;
+        }
+
+        //否则，从数据库查数据，并加到缓存中
 
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -121,7 +152,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         List<Dish> dishList = this.list(queryWrapper);
 
         //查询菜品的分类和口味信息
-        List<DishDto> dishDtoList = dishList.stream().map((item) -> {
+       dishDtoList = dishList.stream().map((item) -> {
             DishDto dishDto = new DishDto();
             //拷贝属性
             BeanUtils.copyProperties(item, dishDto);
@@ -141,6 +172,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
             return dishDto;
         }).collect(Collectors.toList());
+
+       redisTemplate.opsForValue().set(key,  JSONObject.toJSONString(dishDtoList));
 
         return dishDtoList;
     }

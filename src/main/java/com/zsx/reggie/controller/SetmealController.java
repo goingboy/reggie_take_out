@@ -170,18 +170,9 @@ public class SetmealController {
     public R<List<Setmeal>> list(Setmeal setmeal) {
         log.info("查询套餐分类id为{}的套餐", setmeal.getCategoryId());
 
-        //构造查询条件
-        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        List<Setmeal> setmeals = setmealService.listSetmeal(setmeal);
 
-        //添加排序条件
-        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
-        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
-        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
-
-        //执行查询
-        List<Setmeal> setmealList = setmealService.list(queryWrapper);
-
-        return R.success(setmealList);
+        return R.success(setmeals);
     }
 
 }

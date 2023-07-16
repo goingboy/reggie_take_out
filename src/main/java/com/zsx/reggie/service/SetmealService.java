@@ -2,7 +2,6 @@ package com.zsx.reggie.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zsx.reggie.dto.SetmealDto;
-import com.zsx.reggie.entity.Dish;
 import com.zsx.reggie.entity.Setmeal;
 
 import java.util.List;
@@ -33,4 +32,6 @@ public interface SetmealService extends IService<Setmeal> {
      * @param setmealDto
      */
     void updateWithDish(SetmealDto setmealDto);
+
+    List<Setmeal> listSetmeal(Setmeal setmeal);
 }
