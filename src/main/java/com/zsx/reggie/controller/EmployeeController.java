@@ -12,7 +12,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -62,7 +61,7 @@ public class EmployeeController {
     }
 
     /**
-     * 员工推出
+     * 员工退出
      *
      * @param request
      * @return
